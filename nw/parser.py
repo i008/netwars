@@ -1,7 +1,10 @@
+from typing import List
 from urllib.parse import urljoin
+
 import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
-from typing import List
+
+from nw.loggers import logger
 
 
 class NwBase(object):
@@ -113,6 +116,10 @@ class NwParser(object):
         self.logged_in = False
 
     def topic_to_json(self, topic_number: int) -> List[object]:
+        logger.debug('parsing topic number {!s}'.format(topic_number))
+        logger.debug('DEBUG')
+        logger.info('INFO')
+        logger.critical('CRITICAL')
         soup = self._url_to_soup(self.BASE_URL_TOPIC.format(topic_number))
         return self._topic_soup_to_json(soup)
 
@@ -135,10 +142,7 @@ class NwParser(object):
         return topics, users
 
 
-TagList = List[Tag]
-
-
-def process_post_bodies(bodies: TagList) -> (str, list):
+def process_post_bodies(bodies: List[Tag]) -> (str, list):
     for body in bodies:
         cites = []
         cited = body.findAll('div', {'class': 'cite'})

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="Sqlite (Xerial) - nw_db.sqlite">
+  <database-model serializer="dbm" rdbms="SQLITE" format-version="2.6">
+    <schema id="1">
+      <visible>1</visible>
+    </schema>
+    <table id="2" parent="1" name="nw_failed"/>
+    <table id="3" parent="1" name="nwdump"/>
+    <column id="4" parent="2" name="id">
+      <mandatory>1</mandatory>
+      <data-type>INTEGER(0,-1)|4</data-type>
+    </column>
+    <column id="5" parent="2" name="url_failed">
+      <data-type>VARCHAR(0,-1)|12</data-type>
+    </column>
+    <key id="6" parent="2">
+      <columns>id</columns>
+      <primary>1</primary>
+    </key>
+    <column id="7" parent="3" name="id">
+      <mandatory>1</mandatory>
+      <data-type>INTEGER(0,-1)|4</data-type>
+    </column>
+    <column id="8" parent="3" name="topic_url">
+      <data-type>VARCHAR(0,-1)|12</data-type>
+    </column>
+    <column id="9" parent="3" name="topic_html">
+      <data-type>TEXT(0,-1)|12</data-type>
+    </column>
+    <column id="10" parent="3" name="status_code">
+      <data-type>INTEGER(0,-1)|4</data-type>
+    </column>
+    <key id="11" parent="3">
+      <columns>id</columns>
+      <primary>1</primary>
+    </key>
+  </database-model>
+</dataSource>
