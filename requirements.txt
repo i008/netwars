@@ -1,0 +1,10 @@
+elasticsearch==5.0.0
+python_logstash==0.4.6
+requests==2.11.1
+beautifulsoup4==4.5.1
+python_dateutil==2.6.0
+grequests==0.3.0
+logstash==0.1dev
+SQLAlchemy==1.1.4
+tqdm==4.10.0
+typing==3.5.2
