@@ -12,17 +12,17 @@ from sqlalchemy import Table
 from sqlalchemy import create_engine
 
 from nw.loggers import logger
+from nw.elastic_indexer import ElasticIndexerNW
 
 MAX_TOPIC_NR = 173485
-TOPIC_RANGE_TO_SCRAPE = range(MAX_TOPIC_NR - 600, MAX_TOPIC_NR)
-NUMBER_TOPICS_PER_BATCH = 100
-TIME_TO_SLEEP = 0
+TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 500, MAX_TOPIC_NR))
+NUMBER_TOPICS_PER_BATCH = 1
+TIME_TO_SLEEP = 0.6
 TOPIC = 'http://netwars.pl/temat/{!s}'
 DB_URI = "sqlite:///nw_db.sqlite"
 
 engine = create_engine(DB_URI)
 metadata = MetaData(engine)
-
 
 nw_raw = Table(
     'nwdump',
@@ -48,8 +48,8 @@ def grouper(n: int, iterable: Iterable, fillvalue=None):
 
 def handle_exp(request, exception):
     logger.info('OH SHIT! failed to get {} \n exception: {}'.format(request.url, exception))
-    time.sleep(3)
     conn.execute(nw_failed.insert(), {'url_failed': request.url})
+    time.sleep(20)
 
 
 def process_batch(url_range: Iterable) -> list:
@@ -61,7 +61,7 @@ def process_batch(url_range: Iterable) -> list:
     prepared_requests = (grequests.get(url) for url in url_range)
     results = grequests.map(prepared_requests, exception_handler=handle_exp)
     # logger.info("batch processed")
-    return results
+    return filter(None, results)
 
 
 def batch_to_db_format(batch_results):
@@ -76,11 +76,16 @@ def main():
         res = process_batch([TOPIC.format(i) for i in topic_ids if i])
         batch_save = batch_to_db_format(res)
         conn.execute(nw_raw.insert(), batch_save)
-
+        for r in res:
+            logger.info('indexing into Elastic')
+            es_indexer.index_raw_topic_html(
+                topic_html=r.text,
+                topic_url=r.url,
+                status_code=r.status_code
+            )
 
 if __name__ == '__main__':
     metadata.create_all()
     conn = engine.connect()
+    es_indexer = ElasticIndexerNW()
     main()
-    print(metadata.__dict__)
-

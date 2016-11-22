@@ -1,6 +1,8 @@
+import datetime
 from typing import List
 from urllib.parse import urljoin
 
+from dateutil import parser
 import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
 
@@ -27,6 +29,16 @@ class NwParser(object):
     @staticmethod
     def _url_to_soup(url: str):
         return BeautifulSoup(requests.get(url).text, 'lxml')
+
+    @staticmethod
+    def _nw_datetime_to_real_datetime(nw_date_string, scrape_date=datetime.date.today()):
+        if 'Wczoraj' in nw_date_string:
+            real_datetime = nw_date_string.replace('Wczoraj,', str(scrape_date))
+        elif 'Dzisiaj' in nw_date_string:
+            real_datetime = nw_date_string.replace('Dzisiaj,', str(scrape_date))
+        else:
+            real_datetime = nw_date_string
+        return parser.parse(real_datetime)
 
     @staticmethod
     def _topic_differences(old: dict, new: dict) -> dict:
@@ -78,11 +90,12 @@ class NwParser(object):
                 'topic_id': topic_id,
                 'forum_id': forum_id,
                 'post_id': pid,
-                'post_date': pdate,
+                'post_date': NwParser._nw_datetime_to_real_datetime(pdate),
                 'user_href': href,
                 'user_name': uname,
                 'post_body': body,
-                'cites': cites
+                'cites': cites,
+                'unique_post_id': '{!s}.{!s}'.format(topic_id, pid)
 
             } for pid, pdate, href, uname, (body, cites) in
             zip(ids, dates, user_hrefs, user_names, post_bodies)
@@ -90,9 +103,9 @@ class NwParser(object):
 
         topic_meta = {
             'forum_id': forum_id,
+            'topic_id': topic_id,
             'topic_name': topic_name,
-            'topic_id': topic_id
-
+            'topic_created_at': posts_list[0]['post_date']
         }
 
         return posts_list, topic_meta
@@ -117,9 +130,6 @@ class NwParser(object):
 
     def topic_to_json(self, topic_number: int) -> List[object]:
         logger.debug('parsing topic number {!s}'.format(topic_number))
-        logger.debug('DEBUG')
-        logger.info('INFO')
-        logger.critical('CRITICAL')
         soup = self._url_to_soup(self.BASE_URL_TOPIC.format(topic_number))
         return self._topic_soup_to_json(soup)
 
@@ -165,3 +175,4 @@ def process_post_bodies(bodies: List[Tag]) -> (str, list):
 if __name__ == '__main__':
     nw = NwParser()
     res = nw.topic_to_json(173452)
+    # print(res)
