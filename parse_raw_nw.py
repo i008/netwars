@@ -1,14 +1,13 @@
+from typing import Iterable
+
 import time
 import grequests
 import tqdm
 
 from itertools import zip_longest
-from typing import Iterable
 
-from sqlalchemy import Column
-from sqlalchemy import Integer, String, Text
+from sqlalchemy import Table, Column, Integer, String, Text
 from sqlalchemy import MetaData
-from sqlalchemy import Table
 from sqlalchemy import create_engine
 
 from nw.loggers import logger
@@ -54,7 +53,6 @@ def handle_exp(request, exception):
 
 def process_batch(url_range: Iterable) -> list:
     """
-
     :param url_range:
     :return:
     """
@@ -71,13 +69,12 @@ def batch_to_db_format(batch_results):
 def main():
     grouped_urls_ids = list(grouper(NUMBER_TOPICS_PER_BATCH, TOPIC_RANGE_TO_SCRAPE))
     for topic_ids in tqdm.tqdm(grouped_urls_ids):
-        if TIME_TO_SLEEP:
-            time.sleep(TIME_TO_SLEEP)
+        time.sleep(TIME_TO_SLEEP)
         res = process_batch([TOPIC.format(i) for i in topic_ids if i])
         batch_save = batch_to_db_format(res)
         conn.execute(nw_raw.insert(), batch_save)
+        logger.info('Indexing into Elastic')
         for r in res:
-            logger.info('indexing into Elastic')
             es_indexer.index_raw_topic_html(
                 topic_html=r.text,
                 topic_url=r.url,

@@ -9,22 +9,38 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from nw.loggers import logger
 
 
-class NwBase(object):
-    pass
-
-
-class NwParser(object):
+class NwBase:
     BASE_URL = 'http://netwars.pl/'
     BASE_URL_TOPIC = 'http://netwars.pl/temat/{!s}'
     OT_FORUM_NUMBER = '4'
-
-    def __repr__(self):
-        return '%s(%r)' % (self.__class__, self.username)
 
     def __init__(self, username=None, password=None):
         self.username = username
         self.password = password
         self.logged_in = False
+
+    def login(self):
+        if not self.username or not self.password:
+            raise ValueError('No cred')
+
+        payload = {
+            'tnick': self.username,
+            'tpass': self.password
+        }
+
+        nwsession = requests.session()
+        nwsession.post(urljoin(self.BASE_URL, 'login'), payload)
+        self.nwsession = nwsession
+        self.logged_in = True
+
+    def logout(self):
+        self.nwsession.post(urljoin(self.BASE_URL, 'logout'))
+        self.logged_in = False
+
+
+class NwParser(NwBase):
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__, self.username)
 
     @staticmethod
     def _url_to_soup(url: str):
@@ -67,7 +83,8 @@ class NwParser(object):
             lambda x: 'topic_' in x, [
                 d.get('id', 'not-relevant')
                 for d in soup.findAll('div')
-                ]))
+                ]
+        ))
 
         topic_id = int(topic_number[0].split('_')[-1])
         navi_list = [a for a in soup.findAll('ul', {'class': 'forum_navi'})][0].findAll('li')
@@ -89,15 +106,15 @@ class NwParser(object):
             {
                 'topic_id': topic_id,
                 'forum_id': forum_id,
-                'post_id': pid,
-                'post_date': NwParser._nw_datetime_to_real_datetime(pdate),
+                'post_id': post_id,
+                'post_date': NwParser._nw_datetime_to_real_datetime(post_date),
                 'user_href': href,
                 'user_name': uname,
                 'post_body': body,
                 'cites': cites,
-                'unique_post_id': '{!s}.{!s}'.format(topic_id, pid)
+                'unique_post_id': '{!s}.{!s}'.format(topic_id, post_id)
 
-            } for pid, pdate, href, uname, (body, cites) in
+            } for post_id, post_date, href, uname, (body, cites) in
             zip(ids, dates, user_hrefs, user_names, post_bodies)
             ]
 
@@ -109,24 +126,6 @@ class NwParser(object):
         }
 
         return posts_list, topic_meta
-
-    def login(self):
-        if not self.username or not self.password:
-            raise ValueError('No cred')
-
-        payload = {
-            'tnick': self.username,
-            'tpass': self.password
-        }
-
-        nwsession = requests.session()
-        nwsession.post(urljoin(self.BASE_URL, 'login'), payload)
-        self.nwsession = nwsession
-        self.logged_in = True
-
-    def logout(self):
-        self.nwsession.post(urljoin(self.BASE_URL, 'logout'))
-        self.logged_in = False
 
     def topic_to_json(self, topic_number: int) -> List[object]:
         logger.debug('parsing topic number {!s}'.format(topic_number))
@@ -154,20 +153,19 @@ class NwParser(object):
 
 def process_post_bodies(bodies: List[Tag]) -> (str, list):
     for body in bodies:
-        cites = []
+        cites = list()
         cited = body.findAll('div', {'class': 'cite'})
         if cited:
-            cites = []
-            for c in cited:
-                cites.append(c['name'])
+            cites = [c['name'] for c in cited]
         collect_text = []
         for tag in body:
             if tag.name not in ('div', 'p'):
                 if hasattr(tag, 'text'):
                     collect_text.append(tag.text)
-                if isinstance(tag, NavigableString):
+                elif isinstance(tag, NavigableString):
                     collect_text.append(str(tag))
-
+                else:
+                    collect_text.append('\n')
         else:
             yield ''.join(collect_text), cites
 
@@ -175,4 +173,7 @@ def process_post_bodies(bodies: List[Tag]) -> (str, list):
 if __name__ == '__main__':
     nw = NwParser()
     res = nw.topic_to_json(173452)
-    # print(res)
+    print(res[0][10])
+    topics, users = nw.home_page_status()
+    print(topics)
+    print(users)

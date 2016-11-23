@@ -12,7 +12,9 @@ def get_logger():
     logstash_handler.setLevel(logging.DEBUG)
 
     stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    stdout_formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
     stdout_handler.setLevel(logging.DEBUG)
     stdout_handler.setFormatter(stdout_formatter)
 
@@ -20,5 +22,6 @@ def get_logger():
     logger.addHandler(logstash_handler)
 
     return logger
+
 
 logger = get_logger()

@@ -20,8 +20,22 @@ class ElasticIndexerNW:
                 'date_indexed': datetime.datetime.utcnow()
             })
 
-    def index_nw_post(self, post_template):
-        pass
+    def index_nw_post(self, nw_post_dict):
+        self.es.index(
+            index='nw',
+            doc_type='post',
+            id=nw_post_dict['unique_post_id'],
+            body=nw_post_dict
+        )
 
-    def index_nw_topic(self, topic):
+    def index_nw_topic(self, nw_topic_dict):
+        self.es.index(
+            index='nw',
+            doc_type='topic',
+            id=nw_topic_dict.get('topic_id'),
+            body=nw_topic_dict
+        )
+
+    def index_active_users(self, nw_active_users):
         pass
+        # timenow = datetime.datetime.utcnow()
