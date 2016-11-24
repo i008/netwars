@@ -14,9 +14,9 @@ from nw.loggers import logger
 from nw.elastic_indexer import ElasticIndexerNW
 
 MAX_TOPIC_NR = 173485
-TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 500, MAX_TOPIC_NR))
+TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 10, MAX_TOPIC_NR))
 NUMBER_TOPICS_PER_BATCH = 1
-TIME_TO_SLEEP = 0.6
+TIME_TO_SLEEP = 1
 TOPIC = 'http://netwars.pl/temat/{!s}'
 DB_URI = "sqlite:///nw_db.sqlite"
 
@@ -73,13 +73,13 @@ def main():
         res = process_batch([TOPIC.format(i) for i in topic_ids if i])
         batch_save = batch_to_db_format(res)
         conn.execute(nw_raw.insert(), batch_save)
-        logger.info('Indexing into Elastic')
-        for r in res:
-            es_indexer.index_raw_topic_html(
-                topic_html=r.text,
-                topic_url=r.url,
-                status_code=r.status_code
-            )
+        # logger.info('Indexing into Elastic')
+        # for r in res:
+        #     es_indexer.index_raw_topic_html(
+        #         topic_html=r.text,
+        #         topic_url=r.url,
+        #         status_code=r.status_code
+        #     )
 
 if __name__ == '__main__':
     metadata.create_all()

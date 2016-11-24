@@ -1,9 +1,9 @@
+lxml
 elasticsearch
-python_logstash
 requests
 beautifulsoup4
 python_dateutil
 grequests
-logstash
+python-logstash
 SQLAlchemy
 tqdm

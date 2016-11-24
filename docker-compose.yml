@@ -1,0 +1,5 @@
+netwars:
+  build: .
+  command: ['python','parse_raw_nw.py']
+  volumes:
+    - .:/etc/netwars
