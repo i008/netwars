@@ -1,3 +1,4 @@
+redis
 lxml
 elasticsearch
 requests
@@ -7,3 +8,5 @@ grequests
 python-logstash
 SQLAlchemy
 tqdm
+apscheduler
+pytz
