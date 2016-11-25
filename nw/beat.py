@@ -1,27 +1,18 @@
-from apscheduler.jobstores.redis import RedisJobStore
-# from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.executors.pool import ProcessPoolExecutor
-from pytz import utc
-import redis
+import pickle
 import time
+
+import redis
+from apscheduler.schedulers.blocking import BlockingScheduler
+
 from nw.loggers import logger
 from nw.parser import NwParser
-import pickle
-
+from nw.settings import REDIS_HOST
 
 scheduler = BlockingScheduler()
 
 
-def set_python_object_to_redis(obj, key_name):
-    red_conn.set(key_name, pickle.dumps(obj))
-
-
-def get_python_object_form_redis(key_name):
-    pass
-
-
 def beat():
+    logger.info("Running BEAT {}".format(i))
     try:
         topic_status = pickle.loads(red_conn.get('topic_status'))
         user_status = pickle.loads(red_conn.get('user_status'))
@@ -41,8 +32,8 @@ def beat():
 
     elif topic_status and user_status:
         topics_new, users_new = nw.home_page_status()
-        topic_diff = nw._topic_differences(topic_status, topics_new)
-        users_diff = nw._live_user_differences(user_status, users_new)
+        topic_diff = nw.topic_differences(topic_status, topics_new)
+        users_diff = nw.live_user_differences(user_status, users_new)
 
         if topic_diff:
             # main task here
@@ -53,9 +44,26 @@ def beat():
             red_conn.set('topic_status', pickle.dumps(users_new))
 
 
+class NetwarsBeat:
+    def __init__(self, redis_connection, delay):
+        self.redis = redis_connection
+        self.delay = delay
+
+    def _set_python_object_to_redis(self, python_object, key_name):
+        status = self.redis.set(key_name, pickle.dumps(python_object))
+        if not status:
+            raise ValueError('Failed saving object in redis')
+
+    def _get_python_object_from_redis(self, key_name):
+        try:
+            pickle.loads(self.redis.get(key_name))
+        except pickle.UnpicklingError:
+            logger.info('contro')
+
+
 if __name__ == '__main__':
     time.sleep(3)
-    red_conn = redis.StrictRedis(host='redis')
+    red_conn = redis.StrictRedis(host=REDIS_HOST)
     nw = NwParser()
     scheduler.add_job(beat, 'interval', seconds=100)
     scheduler.start()

@@ -14,7 +14,7 @@ class TestNwParser(TestCase):
     def test__topic_differences(self):
         d1 = {'a': 10, 'b': 20, 'c': 30}
         d2 = {'a': 11, 'x': 10, 'c': 30, 'b': 20, 'z': None, 'k': None}
-        res = NwParser._topic_differences(d1, d2)
+        res = NwParser.topic_differences(d1, d2)
         self.assertIn('a', res)
         self.assertIn('x', res)
         self.assertIn('k', res)

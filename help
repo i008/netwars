@@ -1,2 +1,4 @@
 docker-compose run netwars python parse_raw_nw.py
 scp  -i ~/netwars_micro_instance2.pem -r requirements.txt  ec2-user@ec2-35-156-18-56.eu-central-1.compute.amazonaws.com:/home/ec2-user
+docker-compose run  netwars_scrape python parse_raw_nw.py  --sleep 1 --nr_topics_per_batch 2
+rq worker {queue} -v

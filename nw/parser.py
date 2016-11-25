@@ -1,3 +1,5 @@
+
+
 import datetime
 from typing import List
 from urllib.parse import urljoin
@@ -57,14 +59,14 @@ class NwParser(NwBase):
         return parser.parse(real_datetime)
 
     @staticmethod
-    def _topic_differences(old: dict, new: dict) -> dict:
+    def topic_differences(old: dict, new: dict) -> dict:
         """
         Return topics that changed between two scrapes
         """
         return dict((set(new.items()) - set(old.items()))).keys()
 
     @staticmethod
-    def _live_user_differences(old: list, new: list) -> bool:
+    def live_user_differences(old: list, new: list) -> bool:
         """
 
         :param old: old version of nw-meta to be compared against

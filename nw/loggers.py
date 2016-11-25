@@ -18,8 +18,13 @@ def get_logger():
     stdout_handler.setLevel(logging.DEBUG)
     stdout_handler.setFormatter(stdout_formatter)
 
+    hdlr = logging.FileHandler('myapp.log')
+    hdlr.setFormatter(stdout_formatter)
+    hdlr.setLevel(logging.DEBUG)
+
     logger.addHandler(stdout_handler)
     logger.addHandler(logstash_handler)
+    logger.addHandler(hdlr)
 
     return logger
 

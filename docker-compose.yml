@@ -6,6 +6,7 @@ netwars_beat:
     - .:/etc/netwars
   links:
     - redis
+
   command: ['python','nw/beat.py']
 
 netwars_scrape:
@@ -15,6 +16,12 @@ netwars_scrape:
   volumes:
     - .:/etc/netwars
 #  command: ['python','parse_raw_nw.py']
+#
+#
+#workers:
+#  build: .
+#  links:
+#    - redis
 
 redis:
     image: redis

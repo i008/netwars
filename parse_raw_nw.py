@@ -13,8 +13,10 @@ from sqlalchemy import create_engine
 from nw.loggers import logger
 from nw.elastic_indexer import ElasticIndexerNW
 
+import begin
+
 MAX_TOPIC_NR = 173485
-TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 10, MAX_TOPIC_NR))
+TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 100, MAX_TOPIC_NR))
 NUMBER_TOPICS_PER_BATCH = 1
 TIME_TO_SLEEP = 1
 TOPIC = 'http://netwars.pl/temat/{!s}'
@@ -66,10 +68,17 @@ def batch_to_db_format(batch_results):
     return [{'topic_url': r.url, 'topic_html': r.text, 'status_code': r.status_code} for r in batch_results if r]
 
 
-def main():
-    grouped_urls_ids = list(grouper(NUMBER_TOPICS_PER_BATCH, TOPIC_RANGE_TO_SCRAPE))
-    for topic_ids in tqdm.tqdm(grouped_urls_ids):
-        time.sleep(TIME_TO_SLEEP)
+@begin.start(auto_convert=True)
+def run_scraper(sleep: 'Time to sleep between requests' = 1.0,
+                nr_topics_per_batch: 'Number of topics scraped (async)' = 1):
+    metadata.create_all()
+    conn = engine.connect()
+    es_indexer = ElasticIndexerNW()
+    grouped_urls_ids = list(grouper(nr_topics_per_batch, TOPIC_RANGE_TO_SCRAPE))
+    for i, topic_ids in enumerate(grouped_urls_ids):
+        if i % 10 == 0:
+            logger.info("processed {} batches".format(i))
+        time.sleep(sleep)
         res = process_batch([TOPIC.format(i) for i in topic_ids if i])
         batch_save = batch_to_db_format(res)
         conn.execute(nw_raw.insert(), batch_save)
@@ -80,9 +89,3 @@ def main():
         #         topic_url=r.url,
         #         status_code=r.status_code
         #     )
-
-if __name__ == '__main__':
-    metadata.create_all()
-    conn = engine.connect()
-    es_indexer = ElasticIndexerNW()
-    main()
