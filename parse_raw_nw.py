@@ -15,8 +15,9 @@ from nw.elastic_indexer import ElasticIndexerNW
 
 import begin
 
-MAX_TOPIC_NR = 173485
-TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 100, MAX_TOPIC_NR))
+MAX_TOPIC_NR = 173470
+# TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 100, MAX_TOPIC_NR))
+TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR))
 NUMBER_TOPICS_PER_BATCH = 1
 TIME_TO_SLEEP = 1
 TOPIC = 'http://netwars.pl/temat/{!s}'
