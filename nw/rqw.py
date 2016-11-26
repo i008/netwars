@@ -2,8 +2,7 @@ from rq import Worker, Queue, Connection
 from nw.loggers import logger
 from nw.settings import redis_connection
 
-listen = ['high', 'default', 'low']
-
+listen = ['scrape_topics']
 
 if __name__ == '__main__':
     with Connection(redis_connection):

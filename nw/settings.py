@@ -10,8 +10,5 @@ LOGSTASH_PORT = 5959
 ELASTIC_HOSTS = [{'host': ELK_HOST,
                   'port': ELK_PORT}]
 
-
-
-REDIS_HOST = 'localhost'
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 redis_connection = redis.Redis(host=REDIS_HOST)
-

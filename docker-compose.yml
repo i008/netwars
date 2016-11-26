@@ -2,26 +2,31 @@ netwars_beat:
   build: .
   environment:
     - PYTHONPATH=/etc/netwars:$PATH
+    - REDIS_HOST=redis
   volumes:
     - .:/etc/netwars
   links:
     - redis
-
   command: ['python','nw/beat.py']
 
 netwars_scrape:
   build: .
   environment:
     - PYTHONPATH=/etc/netwars:$PATH
+    - REDIS_HOST=redis
   volumes:
     - .:/etc/netwars
 #  command: ['python','parse_raw_nw.py']
 #
 #
-#workers:
-#  build: .
-#  links:
-#    - redis
+workers:
+  build: .
+  links:
+    - redis
+  environment:
+    - PYTHONPATH=/etc/netwars:$PATH
+    - REDIS_HOST=redis
+  command: ['python', 'nw/rqw.py']
 
 redis:
     image: redis
