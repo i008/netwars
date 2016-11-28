@@ -109,8 +109,8 @@ class NwParser(NwBase):
                 'topic_id': topic_id,
                 'forum_id': forum_id,
                 'post_id': post_id,
-                'post_date': NwParser._nw_datetime_to_real_datetime(post_date),
-                'user_href': href,
+                'post_date': str(NwParser._nw_datetime_to_real_datetime(post_date)),
+                'user_href': href.split('/')[-1],
                 'user_name': uname,
                 'post_body': body,
                 'cites': cites,
@@ -173,9 +173,11 @@ def process_post_bodies(bodies: List[Tag]) -> (str, list):
 
 
 if __name__ == '__main__':
+    import json
     nw = NwParser()
-    res = nw.topic_to_json(173452)
-    print(res[0][10])
-    topics, users = nw.home_page_status()
-    print(topics)
-    print(users)
+    res = nw.topic_to_json(173452)[0]
+    with open('bla.txt', 'w') as f:
+        f.write(json.dumps(res))
+    # topics, users = nw.home_page_status()
+
+

@@ -66,7 +66,8 @@ def process_batch(url_range: Iterable) -> list:
 
 
 def batch_to_db_format(batch_results):
-    return [{'topic_url': r.url, 'topic_html': r.text, 'status_code': r.status_code} for r in batch_results if r]
+    return [{'topic_url': r.url, 'topic_html': r.text, 'status_code': r.status_code}
+            for r in batch_results if r]
 
 
 @begin.start(auto_convert=True)
@@ -74,6 +75,7 @@ def run_scraper(sleep: 'Time to sleep between requests' = 1.0,
                 nr_topics_per_batch: 'Number of topics scraped (async)' = 1):
     metadata.create_all()
     conn = engine.connect()
+    nw_raw.insert()
     es_indexer = ElasticIndexerNW()
     grouped_urls_ids = list(grouper(nr_topics_per_batch, TOPIC_RANGE_TO_SCRAPE))
     for i, topic_ids in enumerate(grouped_urls_ids):
@@ -90,3 +92,5 @@ def run_scraper(sleep: 'Time to sleep between requests' = 1.0,
         #         topic_url=r.url,
         #         status_code=r.status_code
         #     )
+
+

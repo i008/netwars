@@ -1,11 +1,14 @@
 from rq import Worker, Queue, Connection
 from nw.loggers import logger
-from nw.settings import redis_connection
+# from nw.settings import redis_connection
+from nw.nw_redis import NwRedis
 
-listen = ['scrape_topics']
+listen = ['scrape_topics'
+          # 'scrape_users'
+          ]
 
 if __name__ == '__main__':
-    with Connection(redis_connection):
+    with Connection(NwRedis().redis_connection):
         logger.info('starting workers')
         worker = Worker(map(Queue, listen))
         worker.work()

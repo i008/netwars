@@ -11,4 +11,4 @@ ELASTIC_HOSTS = [{'host': ELK_HOST,
                   'port': ELK_PORT}]
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-redis_connection = redis.Redis(host=REDIS_HOST)
+# redis_connection = redis.Redis(host=REDIS_HOST)

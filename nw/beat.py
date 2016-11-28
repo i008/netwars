@@ -1,74 +1,64 @@
-import pickle
-import time
-
-import redis
-from apscheduler.schedulers.blocking import BlockingScheduler
-
-from nw.loggers import logger
-from nw.parser import NwParser
-from nw.settings import REDIS_HOST, redis_connection
-from nw.jobs import scrape_topics
+import begin
 import rq
-
-scheduler = BlockingScheduler()
-topic_queue = rq.Queue(connection=redis_connection, name='scrape_topics')
-
-
-def beat():
-	logger.info("Running BEAT {}")
-	try:
-		topic_status = pickle.loads(red_conn.get('topic_status'))
-		user_status = pickle.loads(red_conn.get('user_status'))
-	except:
-		logger.exception('Controlled fail of depickling')
-		topic_status = user_status = None
-
-	if not topic_status and not user_status:
-		topics_new, list_of_users = nw.home_page_status()
-		logger.debug(topics_new)
-		logger.debug(list_of_users)
-		if topics_new:
-			red_conn.set('topic_status', pickle.dumps(topics_new))
-		if list_of_users:
-			red_conn.set('user_status', pickle.dumps(list_of_users))
-		return
-
-	elif topic_status and user_status:
-		topics_new, users_new = nw.home_page_status()
-		topic_diff = nw.topic_differences(topic_status, topics_new)
-		users_diff = nw.live_user_differences(user_status, users_new)
-
-		if topic_diff:
-			logger.debug("Topic format {}".format(topic_diff))
-			topic_queue.enqueue(scrape_topics, kwargs={'topic_ids': list(topic_diff)})
-			red_conn.set('topic_status', pickle.dumps(topics_new))
-
-		if users_diff:
-			# main task here
-			red_conn.set('topic_status', pickle.dumps(users_new))
+from apscheduler.schedulers.blocking import BlockingScheduler
+from nw.jobs import update_re_scrape_topics, test_job
+from nw.loggers import logger
+from nw.nw_redis import NwRedis
+from nw.parser import NwParser
 
 
-class NetwarsBeat:
-	def __init__(self, redis_connection, delay):
-		self.redis = redis_connection
-		self.delay = delay
+class NetwarsBeat(NwParser, NwRedis):
+    def __init__(self):
+        NwRedis.__init__(self)
+        NwParser.__init__(self)
 
-	def _set_python_object_to_redis(self, python_object, key_name):
-		status = self.redis.set(key_name, pickle.dumps(python_object))
-		if not status:
-			raise ValueError('Failed saving object in redis')
+        self.topic_job_queue = rq.Queue(
+            connection=self.redis_connection,
+            name='scrape_topics',
+            default_timeout=200
+        )
+        # self.users_job_queue = rq.Queue(connection=self.redis_connection, name='scrape_users')
+        self.schedule = BlockingScheduler()
 
-	def _get_python_object_from_redis(self, key_name):
-		try:
-			pickle.loads(self.redis.get(key_name))
-		except pickle.UnpicklingError:
-			logger.info('contro')
+    def one_beat(self):
+        logger.debug("staring beat")
+        topic_status = self.get_topics_from_redis()
+        user_status = self.get_users_from_redis()
+
+        if not topic_status or not user_status:
+            topics_new, list_of_users = self.home_page_status()
+            if topics_new:
+                self.save_topics_to_redis(topics_new)
+            if list_of_users:
+                self.save_users_to_redis(list_of_users)
+            return
+
+        elif topic_status and user_status:
+            topics_new, list_of_users_new = self.home_page_status()
+            topic_diff = self.topic_differences(topic_status, topics_new)
+            users_diff = self.live_user_differences(user_status, list_of_users_new)
+
+            # this means that changes on netwars occured between 2 scrapes
+            if topic_diff:
+                # main job (what to do with the changes)
+                logger.debug('in topic diff adding to queue {}'.format(list(topic_diff)))
+                self.topic_job_queue.enqueue(update_re_scrape_topics, kwargs={'topic_ids': list(topic_diff)})
+                self.save_topics_to_redis(topics_new)
+
+            # this means that online users changed between 2 scrapes
+            if users_diff:
+                pass
+
+    def start(self, delay):
+        self.topic_job_queue.enqueue(test_job)
+        self.schedule.add_job(self.one_beat, 'interval', seconds=delay)
+        self.schedule.start()
 
 
-if __name__ == '__main__':
-	logger.info('Staring BEAT')
-	time.sleep(3)
-	red_conn = redis.StrictRedis(host=REDIS_HOST)
-	nw = NwParser()
-	scheduler.add_job(beat, 'interval', seconds=20)
-	scheduler.start()
+@begin.start(auto_convert=True)
+def main(frequency=20):
+    """"
+    :param frequency: Frequency to check netwars for changes
+    :return: None
+    """
+    NetwarsBeat().start(frequency)

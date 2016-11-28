@@ -14,8 +14,11 @@ netwars_scrape:
   environment:
     - PYTHONPATH=/etc/netwars:$PATH
     - REDIS_HOST=redis
+    - ELK_HOST=elk
   volumes:
     - .:/etc/netwars
+  links:
+    - elk
 #  command: ['python','parse_raw_nw.py']
 #
 #
@@ -23,13 +26,32 @@ workers:
   build: .
   links:
     - redis
+    - elk
   environment:
     - PYTHONPATH=/etc/netwars:$PATH
     - REDIS_HOST=redis
+    - ELK_HOST=elk
   command: ['python', 'nw/rqw.py']
 
 redis:
     image: redis
     ports:
       - '6379:6379'
+
+elk:
+    build: ./elk
+    ports:
+      - "5601:5601"
+      - "9200:9200"
+      - "5044:5044"
+      - "5959:5959/udp"
+    volumes:
+        - .:/var/lib/elasticsearch
+
+
+
+
+
+
+
 
