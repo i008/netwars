@@ -1,6 +1,10 @@
 from nw.settings import ELASTIC_HOSTS
 import elasticsearch
 import datetime
+from concurrent.futures import ThreadPoolExecutor
+from superelasticsearch import SuperElasticsearch
+
+client = SuperElasticsearch(hosts=ELASTIC_HOSTS, timeout=30)
 
 
 class ElasticIndexerNW:
@@ -19,6 +23,22 @@ class ElasticIndexerNW:
                 'status_code': status_code,
                 'date_indexed': datetime.datetime.utcnow()
             })
+
+    def index_all_posts_from_topic(self, topic_json):
+        bulk = client.bulk_operation()
+        for p in topic_json:
+            bulk.index(
+                index="nw",
+                doc_type='post',
+                id=p['unique_post_id'],
+                body=p
+            )
+        bulk.execute()
+
+
+    def insert_bulk_posts(self, list_of_posts):
+        pass
+
 
     def index_nw_post(self, nw_post_dict):
         self.es.index(

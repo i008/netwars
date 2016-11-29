@@ -2,9 +2,10 @@ import os
 import redis
 
 LOGGING_LEVEL = 'DEBUG'
+NW_SQL_PATH = '/home/i008/nwdb.sqlite'
 NW_LOGIN = os.environ.get('nw_login', None)
 NW_PASSWORD = os.environ.get('nw_pass', None)
-ELK_HOST = 'localhost'
+ELK_HOST = os.environ.get('ELK_HOST','localhost')
 ELK_PORT = 9200
 LOGSTASH_PORT = 5959
 ELASTIC_HOSTS = [{'host': ELK_HOST,

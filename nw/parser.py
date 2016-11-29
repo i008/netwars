@@ -1,5 +1,3 @@
-
-
 import datetime
 from typing import List
 from urllib.parse import urljoin
@@ -16,10 +14,17 @@ class NwBase:
     BASE_URL_TOPIC = 'http://netwars.pl/temat/{!s}'
     OT_FORUM_NUMBER = '4'
 
-    def __init__(self, username=None, password=None):
+    def __init__(self, nw_date_parsing='initscrape', username=None, password=None):
+        """
+
+        :param nw_date_parsing:  beat or prescrape, we neeed to parse 'Dzisiaj' and 'Wczoraj' differently in those cases
+        :param username:
+        :param password:
+        """
         self.username = username
         self.password = password
         self.logged_in = False
+        self.nw_date_parsing = nw_date_parsing
 
     def login(self):
         if not self.username or not self.password:
@@ -75,8 +80,7 @@ class NwParser(NwBase):
         """
         return set(old) == set(new)
 
-    @staticmethod
-    def _topic_soup_to_json(soup: BeautifulSoup) -> (list, dict):
+    def _topic_soup_to_json(self, soup: BeautifulSoup) -> (list, dict):
 
         if 'Nie znaleziono' in soup.text:
             raise ValueError('Topic does not exist')
@@ -87,7 +91,6 @@ class NwParser(NwBase):
                 for d in soup.findAll('div')
                 ]
         ))
-
         topic_id = int(topic_number[0].split('_')[-1])
         navi_list = [a for a in soup.findAll('ul', {'class': 'forum_navi'})][0].findAll('li')
         forum_id = navi_list[1].a['href']
@@ -98,18 +101,24 @@ class NwParser(NwBase):
         nicks = soup.findAll('div', {'class': 'p2_nick'})
         bodies = soup.findAll('div', {'class': 'post_body'})
 
-        dates = map(lambda x: x.text, dates)
+        dates = list(map(lambda x: x.text, dates))
         post_bodies = process_post_bodies(bodies)
         user_hrefs = map(lambda x: x.a['href'], nicks)
         user_names = map(lambda x: x.a.text, nicks)
         ids = map(lambda x: x['id'].split('_')[-1], ids)
+
+        if self.nw_date_parsing == 'initscrape':
+            first_date = parser.parse(dates[0])
+        else:
+            first_date = datetime.datetime.today()
+
 
         posts_list = [
             {
                 'topic_id': topic_id,
                 'forum_id': forum_id,
                 'post_id': post_id,
-                'post_date': str(NwParser._nw_datetime_to_real_datetime(post_date)),
+                'post_date': NwParser._nw_datetime_to_real_datetime(post_date, first_date),
                 'user_href': href.split('/')[-1],
                 'user_name': uname,
                 'post_body': body,
@@ -128,6 +137,10 @@ class NwParser(NwBase):
         }
 
         return posts_list, topic_meta
+
+    def topic_html_to_json(self, topic_html):
+        soup = BeautifulSoup(topic_html, 'lxml')
+        return self._topic_soup_to_json(soup)
 
     def topic_to_json(self, topic_number: int) -> List[object]:
         logger.debug('parsing topic number {!s}'.format(topic_number))
@@ -173,11 +186,5 @@ def process_post_bodies(bodies: List[Tag]) -> (str, list):
 
 
 if __name__ == '__main__':
-    import json
     nw = NwParser()
     res = nw.topic_to_json(173452)[0]
-    with open('bla.txt', 'w') as f:
-        f.write(json.dumps(res))
-    # topics, users = nw.home_page_status()
-
-
