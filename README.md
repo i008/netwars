@@ -58,6 +58,7 @@ df.head()
 - U need to be authenticated on AWS to download the files from i008 bucket
 - Sometimes ELK-Docker might fail starting  bc o host machine VM settings.
 Usually this will help:
-    ```bash
-    sudo sysctl -w vm.max_map_count=262144
-    ```
+
+```bash
+sudo sysctl -w vm.max_map_count=262144
+```
