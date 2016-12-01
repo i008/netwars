@@ -9,9 +9,11 @@ class NwRedis:
         self.redis_connection = redis.Redis(host=redis_host)
 
     def __setitem__(self, key, value):
+        # TODO in a nicer way instead using shitty magic methods
         pass
 
     def __getitem__(self, item):
+        # TODO in a nicer way isntead using shitty magic methods
         pass
 
     def set_python_object_to_redis(self, python_object, key_name):

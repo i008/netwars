@@ -1,27 +1,22 @@
+import time
+from itertools import zip_longest
 from typing import Iterable
 
-import time
+import begin
 import grequests
-import tqdm
-
-from itertools import zip_longest
-
-from sqlalchemy import Table, Column, Integer, String, Text
 from sqlalchemy import MetaData
+from sqlalchemy import Table, Column, Integer, String, Text
 from sqlalchemy import create_engine
 
 from nw.loggers import logger
-from nw.elastic_indexer import ElasticIndexerNW
-
-import begin
+from nw.settings import DB_URI
 
 MAX_TOPIC_NR = 173470
 # TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 100, MAX_TOPIC_NR))
 TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR))
 NUMBER_TOPICS_PER_BATCH = 1
 TIME_TO_SLEEP = 1
-TOPIC = 'http://netwars.pl/temat/{!s}'
-DB_URI = "sqlite:///nw_db.sqlite"
+
 
 engine = create_engine(DB_URI)
 metadata = MetaData(engine)
@@ -51,7 +46,7 @@ def grouper(n: int, iterable: Iterable, fillvalue=None):
 def handle_exp(request, exception):
     logger.info('OH SHIT! failed to get {} \n exception: {}'.format(request.url, exception))
     conn.execute(nw_failed.insert(), {'url_failed': request.url})
-    time.sleep(20)
+    time.sleep(5)
 
 
 def process_batch(url_range: Iterable) -> list:
@@ -75,8 +70,6 @@ def run_scraper(sleep: 'Time to sleep between requests' = 1.0,
                 nr_topics_per_batch: 'Number of topics scraped (async)' = 1):
     metadata.create_all()
     conn = engine.connect()
-    nw_raw.insert()
-    es_indexer = ElasticIndexerNW()
     grouped_urls_ids = list(grouper(nr_topics_per_batch, TOPIC_RANGE_TO_SCRAPE))
     for i, topic_ids in enumerate(grouped_urls_ids):
         if i % 10 == 0:
@@ -85,12 +78,3 @@ def run_scraper(sleep: 'Time to sleep between requests' = 1.0,
         res = process_batch([TOPIC.format(i) for i in topic_ids if i])
         batch_save = batch_to_db_format(res)
         conn.execute(nw_raw.insert(), batch_save)
-        # logger.info('Indexing into Elastic')
-        # for r in res:
-        #     es_indexer.index_raw_topic_html(
-        #         topic_html=r.text,
-        #         topic_url=r.url,
-        #         status_code=r.status_code
-        #     )
-
-

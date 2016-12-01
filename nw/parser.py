@@ -17,9 +17,10 @@ class NwBase:
     def __init__(self, nw_date_parsing='initscrape', username=None, password=None):
         """
 
-        :param nw_date_parsing:  beat or prescrape, we neeed to parse 'Dzisiaj' and 'Wczoraj' differently in those cases
-        :param username:
-        :param password:
+        :param nw_date_parsing: ('beat' or 'initscrape'),
+        we neeed to parse 'Dzisiaj' and 'Wczoraj' differently depending if parser is used in monitoring or post-scrape
+        :param username: netwars username
+        :param password: netwars password
         """
         self.username = username
         self.password = password
@@ -80,6 +81,26 @@ class NwParser(NwBase):
         """
         return set(old) == set(new)
 
+    @staticmethod
+    def process_post_bodies(bodies: List[Tag]) -> (str, list):
+        for body in bodies:
+            cites = list()
+            cited = body.findAll('div', {'class': 'cite'})
+            if cited:
+                cites = [c['name'] for c in cited]
+            collect_text = []
+            for tag in body:
+                # TODO: This is a suboptimal(and partially wrong) solution to parse cites in post body (a lot to improve here)
+                if tag.name not in ('div', 'p'):
+                    if hasattr(tag, 'text'):
+                        collect_text.append(tag.text)
+                    elif isinstance(tag, NavigableString):
+                        collect_text.append(str(tag))
+                    else:
+                        collect_text.append('\n')
+            else:
+                yield ''.join(collect_text), cites
+
     def _topic_soup_to_json(self, soup: BeautifulSoup) -> (list, dict):
 
         if 'Nie znaleziono' in soup.text:
@@ -102,7 +123,7 @@ class NwParser(NwBase):
         bodies = soup.findAll('div', {'class': 'post_body'})
 
         dates = list(map(lambda x: x.text, dates))
-        post_bodies = process_post_bodies(bodies)
+        post_bodies = self.process_post_bodies(bodies)
         user_hrefs = map(lambda x: x.a['href'], nicks)
         user_names = map(lambda x: x.a.text, nicks)
         ids = map(lambda x: x['id'].split('_')[-1], ids)
@@ -111,7 +132,6 @@ class NwParser(NwBase):
             first_date = parser.parse(dates[0])
         else:
             first_date = datetime.datetime.today()
-
 
         posts_list = [
             {
@@ -166,25 +186,6 @@ class NwParser(NwBase):
         return topics, users
 
 
-def process_post_bodies(bodies: List[Tag]) -> (str, list):
-    for body in bodies:
-        cites = list()
-        cited = body.findAll('div', {'class': 'cite'})
-        if cited:
-            cites = [c['name'] for c in cited]
-        collect_text = []
-        for tag in body:
-            if tag.name not in ('div', 'p'):
-                if hasattr(tag, 'text'):
-                    collect_text.append(tag.text)
-                elif isinstance(tag, NavigableString):
-                    collect_text.append(str(tag))
-                else:
-                    collect_text.append('\n')
-        else:
-            yield ''.join(collect_text), cites
-
-
 if __name__ == '__main__':
-    nw = NwParser()
+    nw = NwParser(nw_date_parsing='initscrape')
     res = nw.topic_to_json(173452)[0]

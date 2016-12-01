@@ -2,7 +2,6 @@ from nw.parser import NwParser
 # from nw.elastic_indexer import ElasticIndexerNW
 from nw.loggers import logger
 import time
-
 nw_parser = NwParser()
 
 
@@ -22,8 +21,3 @@ def update_re_scrape_topics(topic_ids):
 def update_re_scrape_users():
     _, users = nw_parser.home_page_status()
     return users
-
-
-def test_job():
-    print('doing bla job')
-    time.sleep(10000)

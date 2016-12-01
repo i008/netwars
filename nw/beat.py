@@ -17,11 +17,10 @@ class NetwarsBeat(NwParser, NwRedis):
             name='scrape_topics',
             default_timeout=200
         )
-        # self.users_job_queue = rq.Queue(connection=self.redis_connection, name='scrape_users')
         self.schedule = BlockingScheduler()
 
     def one_beat(self):
-        logger.debug("staring beat")
+        logger.info("running beat.")
         topic_status = self.get_topics_from_redis()
         user_status = self.get_users_from_redis()
 
