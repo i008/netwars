@@ -1,25 +1,62 @@
 # Netwars data and scraping
 
+
 ## What is it about:  
 1) Scrape all netwars.pl topics and store raw html in sql/elastic  
-
 2) Parse all raw html files into meaningfull json files and index them in Elasticsearch  
-
 3) Monitor netwars.pl for changes store raw content and index parsed in Elasticsearch.  
-
-3) A scheduled job will look for changes on the front page, once a change is detected.   
-A job to parse and index it will be send to RQ and processed by the worker pool (scrape->store>(re)index).  
-
+4) A scheduled job will look for changes on the front page, once a change is detected, job to parse and index it will be send to RQ and processed by the worker pool (scrape->store>(re)index).  
+5) Visualize and explore the data in Pandas and Kibana
 
 ## Data:
 - Around 5m posts where scraped and indexed in Elastic  
-Elastic data dump can be found here:  aws s3 cp elkdata.7z s3://i008/elkdata.7z  
-HDF5-PandasDataframe-Dump containing every post can be found here: s3://i008/posts_all.h5  
-It looks like that:
-<table border="1" class="dataframe">\n  <thead>\n    <tr style="text-align: right;">\n      <th></th>\n      <th>cites</th>\n      <th>forum_id</th>\n      <th>post_body</th>\n      <th>post_date</th>\n      <th>post_id</th>\n      <th>topic_id</th>\n      <th>unique_post_id</th>\n      <th>user_href</th>\n      <th>user_name</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th>0</th>\n      <td>[]</td>\n      <td>/forum/4</td>\n      <td>Dzisiaj rano wsiadając do auta spotkała mnie n...</td>\n      <td>2016-11-16 13:46:15</td>\n      <td>1</td>\n      <td>173469</td>\n      <td>173469.1</td>\n      <td>29243</td>\n      <td>Vol</td>\n    </tr>\n    <tr>\n      <th>1</th>\n      <td>[]</td>\n      <td>/forum/4</td>\n      <td>Jak nie ma kamer i nikt nic nie widział to rac...</td>\n      <td>2016-11-16 13:50:19</td>\n      <td>2</td>\n      <td>173469</td>\n      <td>173469.2</td>\n      <td>7201</td>\n      <td>Rocca</td>\n    </tr>\n    <tr>\n      <th>2</th>\n      <td>[]</td>\n      <td>/forum/4</td>\n      <td>Dzwon pod 666 podoficer Zupa</td>\n      <td>2016-11-16 13:51:45</td>\n      <td>3</td>\n      <td>173469</td>\n      <td>173469.3</td>\n      <td>18416</td>\n      <td>KiV</td>\n    </tr>\n    <tr>\n      <th>3</th>\n      <td>[post_2]</td>\n      <td>/forum/4</td>\n      <td>i właśnie tak kombinuję, tym bardziej że kole...</td>\n      <td>2016-11-16 13:52:45</td>\n      <td>4</td>\n      <td>173469</td>\n      <td>173469.4</td>\n      <td>29243</td>\n      <td>Vol</td>\n    </tr>\n    <tr>\n      <th>4</th>\n      <td>[]</td>\n      <td>/forum/4</td>\n      <td>&lt;fragment z pulp fiction jak Vince sie zali, z...</td>\n      <td>2016-11-16 13:54:20</td>\n      <td>5</td>\n      <td>173469</td>\n      <td>173469.5</td>\n      <td>15662</td>\n      <td>maac</td>\n    </tr>\n  </tbody>\n</table>'
+- Elastic data dump can be found here: **s3://i008/elkdata.7z**
+- HDF5-PandasDataframe-Dump containing every post can be found here: **s3://i008/posts_all.h5** 
 
+HDF5-table looks like that:   
+
+|cites|forum_id|post_body|post_date|post_id|topic_id|unique_post_id|user_href|user_name|0|1|2|3|4|
+|--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |
+|[]|/forum/4|Dzisiaj rano wsiadając do auta spotkała mnie n...|2016-11-16 13:46:15|1|173469|173469.1|29243|Vol|
+|[]|/forum/4|Jak nie ma kamer i nikt nic nie widział to rac...|2016-11-16 13:50:19|2|173469|173469.2|7201|Rocca|
+|[]|/forum/4|Dzwon pod 666 podoficer Zupa|2016-11-16 13:51:45|3|173469|173469.3|18416|KiV|
+|[post_2]|/forum/4|i właśnie tak kombinuję, tym bardziej że kole...|2016-11-16 13:52:45|4|173469|173469.4|29243|Vol|
+|[]|/forum/4|<fragment z pulp fiction jak Vince sie zali, z...|2016-11-16 13:54:20|5|173469|173469.5|15662|maac|
+
+**shape: (5496160, 9)**
+
+## Raw data:
+There are some things to improve in parsing the data, the Raw-html dump of (almost) every topic can be found here:
+**s3://i008/nwdb.sqlite**
+
+
+## How to explore the data in Kibana
+    - Download the dump elkdata.7z from S3 , unpack in main repo directory,
+    ~ sudo chmod 777 elkdata/.
+    ~ docker-compose up elk  
+    - go to localhost:5601
+
+Kibana example:
+![](http://i.imgur.com/opjT4SH.png=300x "netwars kajbana")
+
+## How to explore the data in Pandas:
+```python
+import pandas as pd
+df = pd.read_hdf('posts_all.h5','posts') # few GB of memory needed
+df.head()
+```
 
 ## Deps:
-- python 3.5+ only
-check requirements.txt for other stuff
+- docker 
+- check requirements.txt for all the rest
 
+## Changelog:
+- Last topic in dumps: /temat/173469
+
+## Other
+- U need to be authenticated on AWS to download the files from i008 bucket
+- Sometimes ELK-Docker might fail starting  bc o host machine VM settings.
+Usually this will help:
+    ```bash
+    sudo sysctl -w vm.max_map_count=262144
+    ```
