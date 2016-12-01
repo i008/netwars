@@ -5,8 +5,7 @@
 - Scrape all netwars.pl topics and store raw html in sql/elastic  
 - Parse all raw html files into meaningfull json files and index them in Elasticsearch  
 - Monitor netwars.pl for changes ->  scrape -> (re)index 
-- A scheduled job will look for changes on the front page, once a change is detected, job to parse and index it will be send to RQ and processed by the worker pool
-to be scraped and indexed in elasticsearch
+- A scheduled job will look for changes on the front page, once a change is detected, job to parse and index it will be send to RQ and processed by the worker pool.
 - Visualize and explore the data in Pandas and Kibana
 
 ## Data:
@@ -32,7 +31,7 @@ There are some things to improve in parsing the data, the Raw-html dump of (almo
 
 
 ## How to explore the data in Kibana
-    - Download the dump elkdata.7z from S3 , unpack in main repo directory,
+    - Dono twnload the dump elkdata.7z from S3 , unpack in main repo directory,
     ~ sudo chmod 777 elkdata/.
     ~ docker-compose up elk  
     - go to localhost:5601

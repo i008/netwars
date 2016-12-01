@@ -1,7 +1,7 @@
 import begin
 import rq
 from apscheduler.schedulers.blocking import BlockingScheduler
-from nw.jobs import update_re_scrape_topics, test_job
+from nw.jobs import index_topics
 from nw.loggers import logger
 from nw.nw_redis import NwRedis
 from nw.parser import NwParser
@@ -41,15 +41,15 @@ class NetwarsBeat(NwParser, NwRedis):
             if topic_diff:
                 # main job (what to do with the changes)
                 logger.debug('in topic diff adding to queue {}'.format(list(topic_diff)))
-                self.topic_job_queue.enqueue(update_re_scrape_topics, kwargs={'topic_ids': list(topic_diff)})
+                self.topic_job_queue.enqueue(index_topics, kwargs={'topic_ids': list(topic_diff)})
                 self.save_topics_to_redis(topics_new)
 
             # this means that online users changed between 2 scrapes
             if users_diff:
+                logger.info("user difference found")
                 pass
 
     def start(self, delay):
-        self.topic_job_queue.enqueue(test_job)
         self.schedule.add_job(self.one_beat, 'interval', seconds=delay)
         self.schedule.start()
 

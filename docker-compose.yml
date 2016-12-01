@@ -1,42 +1,42 @@
-#netwars_beat:
-#  build: .
-#  environment:
-#    - PYTHONPATH=/etc/netwars:$PATH
-#    - REDIS_HOST=redis
-#  volumes:
-#    - .:/etc/netwars
-#  links:
-#    - redis
-#  command: ['python','nw/beat.py']
+netwars_beat:
+  build: .
+  environment:
+    - PYTHONPATH=/etc/netwars:$PATH
+    - REDIS_HOST=redis
+  volumes:
+    - .:/etc/netwars
+  links:
+    - redis
+  command: ['python','nw/beat.py']
+
+netwars_scrape:
+  build: .
+  environment:
+    - PYTHONPATH=/etc/netwars:$PATH
+    - REDIS_HOST=redis
+    - ELK_HOST=elk
+  volumes:
+    - .:/etc/netwars
+  links:
+    - elk
+#  command: ['python','parse_raw_nw.py']
 #
-#netwars_scrape:
-#  build: .
-#  environment:
-#    - PYTHONPATH=/etc/netwars:$PATH
-#    - REDIS_HOST=redis
-#    - ELK_HOST=elk
-#  volumes:
-#    - .:/etc/netwars
-#  links:
-#    - elk
-##  command: ['python','parse_raw_nw.py']
-##
-##
-#workers:
-#  build: .
-#  links:
-#    - redis
-#    - elk
-#  environment:
-#    - PYTHONPATH=/etc/netwars:$PATH
-#    - REDIS_HOST=redis
-#    - ELK_HOST=elk
-#  command: ['python', 'nw/rqw.py']
 #
-#redis:
-#    image: redis
-#    ports:
-#      - '6379:6379'
+workers:
+  build: .
+  links:
+    - redis
+    - elk
+  environment:
+    - PYTHONPATH=/etc/netwars:$PATH
+    - REDIS_HOST=redis
+    - ELK_HOST=elk
+  command: ['python', 'nw/rqw.py']
+
+redis:
+    image: redis
+    ports:
+      - '6379:6379'
 
 elk:
     build: ./elk
@@ -46,7 +46,7 @@ elk:
       - "5044:5044"
       - "5959:5959/udp"
     volumes:
-      - './elkdata/:/var/lib/elasticsearch'
+      - '/media/i008/0E247F33247F1CC11/elkdata/:/var/lib/elasticsearch'
 
 
 

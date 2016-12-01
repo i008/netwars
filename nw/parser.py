@@ -139,24 +139,19 @@ class NwParser(NwBase):
                 'forum_id': forum_id,
                 'post_id': post_id,
                 'post_date': NwParser._nw_datetime_to_real_datetime(post_date, first_date),
-                'user_href': href.split('/')[-1],
+                'user_id': int(href.split('/')[-1]),
                 'user_name': uname,
                 'post_body': body,
-                'cites': cites,
-                'unique_post_id': '{!s}.{!s}'.format(topic_id, post_id)
+                'cites': [str(topic_id)+'-'+c.split('_')[-1] for c in cites],
+                'unique_post_id': '{!s}-{!s}'.format(topic_id, post_id),
+                'topic_name':topic_name
 
             } for post_id, post_date, href, uname, (body, cites) in
             zip(ids, dates, user_hrefs, user_names, post_bodies)
             ]
 
-        topic_meta = {
-            'forum_id': forum_id,
-            'topic_id': topic_id,
-            'topic_name': topic_name,
-            'topic_created_at': posts_list[0]['post_date']
-        }
 
-        return posts_list, topic_meta
+        return posts_list
 
     def topic_html_to_json(self, topic_html):
         soup = BeautifulSoup(topic_html, 'lxml')

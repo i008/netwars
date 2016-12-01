@@ -9,7 +9,7 @@ from sqlalchemy import Table, Column, Integer, String, Text
 from sqlalchemy import create_engine
 
 from nw.loggers import logger
-from nw.settings import DB_URI
+from nw.settings import DB_URI, TOPIC
 
 MAX_TOPIC_NR = 173470
 # TOPIC_RANGE_TO_SCRAPE = reversed(range(MAX_TOPIC_NR - 100, MAX_TOPIC_NR))

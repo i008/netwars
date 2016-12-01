@@ -1,6 +1,6 @@
 redis
 lxml
-elasticsearch
+pyelasticsearch
 requests
 beautifulsoup4
 python_dateutil

@@ -1,11 +1,11 @@
 from rq import Worker, Queue, Connection
 from nw.loggers import logger
-# from nw.settings import redis_connection
 from nw.nw_redis import NwRedis
 
-listen = ['scrape_topics'
-          # 'scrape_users'
-          ]
+listen = [
+    'scrape_topics'
+    # 'scrape_users'
+]
 
 if __name__ == '__main__':
     with Connection(NwRedis().redis_connection):
