@@ -2,11 +2,12 @@
 
 
 ## What is it about:  
-1) Scrape all netwars.pl topics and store raw html in sql/elastic  
-2) Parse all raw html files into meaningfull json files and index them in Elasticsearch  
-3) Monitor netwars.pl for changes store raw content and index parsed in Elasticsearch.  
-4) A scheduled job will look for changes on the front page, once a change is detected, job to parse and index it will be send to RQ and processed by the worker pool (scrape->store>(re)index).  
-5) Visualize and explore the data in Pandas and Kibana
+- Scrape all netwars.pl topics and store raw html in sql/elastic  
+- Parse all raw html files into meaningfull json files and index them in Elasticsearch  
+- Monitor netwars.pl for changes ->  scrape -> (re)index 
+- A scheduled job will look for changes on the front page, once a change is detected, job to parse and index it will be send to RQ and processed by the worker pool
+to be scraped and indexed in elasticsearch
+- Visualize and explore the data in Pandas and Kibana
 
 ## Data:
 - Around 5m posts where scraped and indexed in Elastic  
