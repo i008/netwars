@@ -13,7 +13,8 @@
 - Elastic data dump can be found here: **s3://i008/elkdata.7z**
 - HDF5-PandasDataframe-Dump containing every post can be found here: **s3://i008/nw_posts.hdf5** 
 - SQLite Dump cintaining every post can be found here: **s3://i008/nw_posts.sqlite**
-HDF5-table looks like that:   
+
+Tables looks like that:   
 
 |cites|forum_id|post_body|post_date|post_id|topic_id|topic_name|unique_post_id|user_id|user_name|0|1|2|3|4|
 |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |
