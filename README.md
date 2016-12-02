@@ -11,17 +11,17 @@
 ## Data:
 - Around 5m posts where scraped and indexed in Elastic  
 - Elastic data dump can be found here: **s3://i008/elkdata.7z**
-- HDF5-PandasDataframe-Dump containing every post can be found here: **s3://i008/posts_all.h5** 
-
+- HDF5-PandasDataframe-Dump containing every post can be found here: **s3://i008/nw_posts.hdf5** 
+- SQLite Dump cintaining every post can be found here: **s3://i008/nw_posts.sqlite**
 HDF5-table looks like that:   
 
-|cites|forum_id|post_body|post_date|post_id|topic_id|unique_post_id|user_href|user_name|0|1|2|3|4|
-|--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |
-|[]|/forum/4|Dzisiaj rano wsiadając do auta spotkała mnie n...|2016-11-16 13:46:15|1|173469|173469.1|29243|Vol|
-|[]|/forum/4|Jak nie ma kamer i nikt nic nie widział to rac...|2016-11-16 13:50:19|2|173469|173469.2|7201|Rocca|
-|[]|/forum/4|Dzwon pod 666 podoficer Zupa|2016-11-16 13:51:45|3|173469|173469.3|18416|KiV|
-|[post_2]|/forum/4|i właśnie tak kombinuję, tym bardziej że kole...|2016-11-16 13:52:45|4|173469|173469.4|29243|Vol|
-|[]|/forum/4|<fragment z pulp fiction jak Vince sie zali, z...|2016-11-16 13:54:20|5|173469|173469.5|15662|maac|
+|cites|forum_id|post_body|post_date|post_id|topic_id|topic_name|unique_post_id|user_id|user_name|0|1|2|3|4|
+|--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |
+|[]|/forum/4|Dzisiaj rano wsiadając do auta spotkała mnie n...|2016-11-16 13:46:15|1|173469|[ZNPZ] Auto porysowane gowździem|173469-1|29243|Vol|
+|[]|/forum/4|Jak nie ma kamer i nikt nic nie widział to rac...|2016-11-16 13:50:19|2|173469|[ZNPZ] Auto porysowane gowździem|173469-2|7201|Rocca|
+|[]|/forum/4|Dzwon pod 666 podoficer Zupa|2016-11-16 13:51:45|3|173469|[ZNPZ] Auto porysowane gowździem|173469-3|18416|KiV|
+|[173469-2]|/forum/4|i właśnie tak kombinuję, tym bardziej że kole...|2016-11-16 13:52:45|4|173469|[ZNPZ] Auto porysowane gowździem|173469-4|29243|Vol|
+|[]|/forum/4|<fragment z pulp fiction jak Vince sie zali, z...|2016-11-16 13:54:20|5|173469|[ZNPZ] Auto porysowane gowździem|173469-5|15662|maac|
 
 **shape: (5496160, 9)**
 
@@ -32,7 +32,6 @@ There are some things to improve in parsing the data, the Raw-html dump of (almo
 
 ## How to explore the data in Kibana
     - Dono twnload the dump elkdata.7z from S3 , unpack in main repo directory,
-    ~ sudo chmod 777 elkdata/.
     ~ docker-compose up elk  
     - go to localhost:5601
 

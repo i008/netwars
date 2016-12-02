@@ -5,3 +5,5 @@ elkdata/
 *.h5
 elkdata.7z
 *.pyc
+*.hdf5
+*.sqlite

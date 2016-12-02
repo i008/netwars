@@ -15,7 +15,7 @@ def index_posts_in_elastic(posts_df, batch_size=10000):
         if len(batch) <= batch_size:
             batch.append(es.index_op(row, id=row.get('unique_post_id')))
         else:
-            logger.inf('writing post batch')
+            logger.info('writing  batch')
             es.bulk(batch, index='nw', doc_type='post')
             batch = []
     es.bulk(batch, index='nw', doc_type='post')
@@ -23,5 +23,5 @@ def index_posts_in_elastic(posts_df, batch_size=10000):
 
 @begin.start(auto_convert=True)
 def main(batch_size=10000):
-    posts_df = pd.read_hdf('posts_all.h5', 'posts')
+    posts_df = pd.read_hdf('nw_posts.hdf5', 'posts')
     index_posts_in_elastic(posts_df, batch_size=batch_size)

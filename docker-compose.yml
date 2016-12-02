@@ -46,7 +46,7 @@ elk:
       - "5044:5044"
       - "5959:5959/udp"
     volumes:
-      - '/media/i008/0E247F33247F1CC11/elkdata/:/var/lib/elasticsearch'
+      - '/media/i008/duzy1/elkdata/:/var/lib/elasticsearch'
 
 
 
