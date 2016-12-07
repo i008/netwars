@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Iterable
 from urllib.parse import urljoin
 
 from dateutil import parser
@@ -65,7 +65,7 @@ class NwParser(NwBase):
         return parser.parse(real_datetime)
 
     @staticmethod
-    def topic_differences(old: dict, new: dict) -> dict:
+    def topic_differences(old: dict, new: dict) -> Iterable:
         """
         Return topics that changed between two scrapes
         """

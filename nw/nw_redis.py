@@ -10,11 +10,11 @@ class NwRedis:
 
     def __setitem__(self, key, value):
         # TODO in a nicer way instead using shitty magic methods
-        pass
+        raise NotImplementedError
 
     def __getitem__(self, item):
         # TODO in a nicer way isntead using shitty magic methods
-        pass
+        raise NotImplementedError
 
     def set_python_object_to_redis(self, python_object, key_name):
         status = self.redis_connection.set(key_name, pickle.dumps(python_object))

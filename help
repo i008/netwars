@@ -4,5 +4,3 @@ rq worker {queue} -v
 chmod 777 elkdata/. # for some reason docker fails without that
 aws configure (optional)
 aws s3 cp s3://i008/elkdata.7z elkdata.7z
-
-
