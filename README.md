@@ -32,7 +32,7 @@ There are some things to improve in parsing the data, the Raw-html dump of (almo
 
 
 ## How to explore the data in Kibana
-    - Dono twnload the dump elkdata.7z from S3 , unpack in main repo directory,
+    - Download the dump elkdata.7z from S3 , unpack in main repo directory,
     ~ docker-compose up elk  
     - go to localhost:5601
 
