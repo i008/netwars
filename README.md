@@ -16,8 +16,8 @@
 
 Tables looks like that:   
 
-|cites|forum_id|post_body|post_date|post_id|topic_id|topic_name|unique_post_id|user_id|user_name|0|1|2|3|4|
-|--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |
+|cites|forum_id|post_body|post_date|post_id|topic_id|topic_name|unique_post_id|user_id|user_name
+|--- |--- |--- |--- |--- |--- |--- |--- |--- |--- |
 |[]|/forum/4|Dzisiaj rano wsiadając do auta spotkała mnie n...|2016-11-16 13:46:15|1|173469|[ZNPZ] Auto porysowane gowździem|173469-1|29243|Vol|
 |[]|/forum/4|Jak nie ma kamer i nikt nic nie widział to rac...|2016-11-16 13:50:19|2|173469|[ZNPZ] Auto porysowane gowździem|173469-2|7201|Rocca|
 |[]|/forum/4|Dzwon pod 666 podoficer Zupa|2016-11-16 13:51:45|3|173469|[ZNPZ] Auto porysowane gowździem|173469-3|18416|KiV|

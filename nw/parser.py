@@ -184,3 +184,5 @@ class NwParser(NwBase):
 if __name__ == '__main__':
     nw = NwParser(nw_date_parsing='initscrape')
     res = nw.topic_to_json(173452)[0]
+
+
