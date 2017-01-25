@@ -1,4 +1,4 @@
 FROM continuumio/miniconda3
-ADD . /etc/netwars
-WORKDIR /etc/netwars
+ADD . /opt/netwars
+WORKDIR /opt/netwars
 RUN pip install -r requirements.txt
